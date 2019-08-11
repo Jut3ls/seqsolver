@@ -1,3 +1,4 @@
 .spyproject
 __pycache__/
 schrodinger.inp
+potential.dat
