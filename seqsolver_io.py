@@ -24,8 +24,8 @@ def main():
             data.append(lines[i].split("#")[0])
             data[i] = data[i].split("\t")[0]
             data[i] = data[i].split("\n")[0]
-        print(data)
     fp.close()
+    return(data)
 
 
 if __name__ == '__main__':

@@ -3,7 +3,7 @@
 equation for any given potential."""
 
 import numpy as np
-from scipy import interpolate
+from scipy import interpolate, linalg
 
 fin_linear = ['2.0', '-2.0 2.0 1999', '1 3', 'linear', '6', '-2.0  0.0',
               '-0.5  0.0', '-0.5 -10.0', ' 0.5 -10.0', ' 0.5  0.0',
@@ -28,45 +28,68 @@ as_cspline = ['1.0', '0.0 20.0 1999', '1 7', 'cspline', '12', ' 0.0 30.0',
 
 def schrodinger(arg):
     """Trying to realize the algorithm here"""
-
+    # Extracting data from input
+    mass = float(arg[0])
+    eigen = np.asarray(arg[2].split(" "), dtype=int)
     window = np.asarray(arg[1].split(" "), dtype=float)
+    delta = window[1]/int(window[2]-1)
+    a = 1/(mass*delta**2)
+
+    # Creating empty arrays to fill with data
     xVal = np.zeros(int(arg[4]), dtype=float)
     yVal = np.zeros(int(arg[4]), dtype=float)
     potential = np.zeros(shape=(int(window[2]), 2), dtype=float)
     xPot = np.linspace(window[0], window[1], int(window[2]))
 
-    for j in range(5, len(arg)):  # Seperating x and y values of interp points
-        xVal[j-5] = np.asarray(arg[j].split())[0]
-        yVal[j-5] = np.asarray(arg[j].split())[1]
+    for i in range(5, len(arg)):  # Seperating x and y values of interp points
+        xVal[i-5] = np.asarray(arg[i].split())[0]
+        yVal[i-5] = np.asarray(arg[i].split())[1]
 
     if arg[3] == "linear":
         yPot = np.interp(xPot, xVal, yVal)
-        for k in range(int(window[2])):  # Saving discrpot in desired format
-            potential[k, 0] = xPot[k]
-            potential[k, 1] = yPot[k]
+        for j in range(int(window[2])):  # Saving discrpot in desired format
+            potential[j, 0] = xPot[j]
+            potential[j, 1] = yPot[j]
         np.savetxt("potential.dat", potential)
 
     elif arg[3] == "polynomial":
         deg = input("Please enter the degree of the fitting polynomial: ")
         fit = np.polyfit(xVal, yVal, int(deg))
         yPot = np.zeros(shape=int(window[2]), dtype=float)
-        for i in range(int(window[2])):
+        for k in range(int(window[2])):
             for l in range(int(deg)+1):  # assigning correct xVal to polyfit
-                yPot[i] += fit[l]*xPot[i]**(int(deg)-l)
-            potential[i, 0] = xPot[i]
-            potential[i, 1] = yPot[i]
+                yPot[k] += fit[l]*xPot[k]**(int(deg)-l)
+            potential[k, 0] = xPot[k]
+            potential[k, 1] = yPot[k]
         np.savetxt("potential.dat", potential)
 
     elif arg[3] == "cspline":
         tck = interpolate.splrep(xVal, yVal)  # Calc interp coefficients
         yPot = interpolate.splev(xPot, tck)  # Evaluate discrete data at xPot
-        for m in range(int(window[2])):
-            potential[m, 0] = xPot[m]
-            potential[m, 1] = yPot[m]
+        for ii in range(int(window[2])):
+            potential[ii, 0] = xPot[ii]
+            potential[ii, 1] = yPot[ii]
         np.savetxt("potential.dat", potential)
 
     else:
         print("Error: Interpolation type not specified.")
+
+    diag = np.zeros(shape=int(window[2]), dtype=float)
+    off_diag = np.zeros(shape=int(window[2])-1, dtype=float)
+    for n in range(int(window[2])):
+        diag[n] = a + potential[n, 1]
+    for m in range(int(window[2]-1)):
+        off_diag[m] = -0.5*a
+
+    energies, wavefuncs = linalg.eigh_tridiagonal(diag, off_diag, select="i",
+                                                  select_range=eigen)
+    np.savetxt("energies.dat", energies)
+    wavefuncs_new = np.zeros(shape=(int(window[2]), eigen[1]+1), dtype=float)
+    for jj in range(int(window[2])):
+        wavefuncs_new[jj, 0] = xPot[jj]
+        for kk in range(eigen[1]):
+            wavefuncs_new[jj, kk+1] = wavefuncs[jj, kk]
+    np.savetxt("wavefuncs.dat", wavefuncs_new)
 
 
 if __name__ == "__main__":
