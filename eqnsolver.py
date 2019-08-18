@@ -5,6 +5,7 @@ equation for any given potential."""
 import numpy as np
 from scipy import interpolate, linalg
 
+
 fin_linear = ['2.0', '-2.0 2.0 1999', '1 3', 'linear', '6', '-2.0  0.0',
               '-0.5  0.0', '-0.5 -10.0', ' 0.5 -10.0', ' 0.5  0.0',
               ' 2.0  0.0']
@@ -27,7 +28,9 @@ as_cspline = ['1.0', '0.0 20.0 1999', '1 7', 'cspline', '12', ' 0.0 30.0',
 
 
 def schrodinger(arg):
-    """Trying to realize the algorithm here"""
+    """
+    Trying to realize the algorithm here
+    """
     # Extracting data from input
     mass = float(arg[0])
     eigen = np.asarray(arg[2].split(" "), dtype=int)
@@ -82,7 +85,7 @@ def schrodinger(arg):
         off_diag[m] = -0.5*a
 
     energies, wavefuncs = linalg.eigh_tridiagonal(diag, off_diag, select="i",
-                                                  select_range=eigen)
+                                                  select_range=eigen-1)
     np.savetxt("energies.dat", energies)
     wavefuncs_new = np.zeros(shape=(int(window[2]), eigen[1]+1), dtype=float)
     for jj in range(int(window[2])):
@@ -91,6 +94,19 @@ def schrodinger(arg):
             wavefuncs_new[jj, kk+1] = wavefuncs[jj, kk]
     np.savetxt("wavefuncs.dat", wavefuncs_new)
 
+    x_expected = np.zeros(shape=eigen[1], dtype=float)
+    x_squared = np.zeros(shape=eigen[1], dtype=float)
+    x_uncertainty = np.zeros(shape=eigen[1], dtype=float)
+    expvalues = np.zeros(shape=(eigen[1], 2), dtype=float)
+    for mm in range(eigen[1]):
+        for nn in range(int(window[2])):
+            x_expected[mm] += wavefuncs_new[nn, mm+1]*wavefuncs_new[nn, 0]*wavefuncs_new[nn, mm+1]
+            x_squared[mm] += wavefuncs_new[nn, mm+1]*wavefuncs_new[nn, 0]**2*wavefuncs_new[nn, mm+1]
+        x_uncertainty[mm] = (x_squared[mm] - x_expected[mm]**2)**0.5
+        expvalues[mm, 0], expvalues[mm, 1] = x_expected[mm], x_uncertainty[mm]
+    np.savetxt("expvalues.dat", expvalues)
+"""----I need to clean redundant variables and arrays----"""
 
-if __name__ == "__main__":
-    schrodinger(as_cspline)
+
+# if __name__ == '__main__':
+  # schrodinger(as_cspline)

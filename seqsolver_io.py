@@ -4,13 +4,13 @@ Main interface for reading and converting input data from schrodinger.inp
 """
 
 import sys
+import eqnsolver
 
 
 def main():
     """Main script functionality"""
 
-    # directory = input("Please enter the directory of your input file:")
-    directory = r"."
+    directory = input("Please enter the directory of your input file:")
     try:
         fp = open(directory + r"\schrodinger.inp", "r")
     except FileNotFoundError:
@@ -25,7 +25,8 @@ def main():
             data[i] = data[i].split("\t")[0]
             data[i] = data[i].split("\n")[0]
     fp.close()
-    return(data)
+
+    eqnsolver.schrodinger(data)
 
 
 if __name__ == '__main__':
