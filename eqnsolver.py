@@ -5,7 +5,6 @@ equation for any given potential."""
 import numpy as np
 from scipy import interpolate, linalg
 
-
 fin_linear = ['2.0', '-2.0 2.0 1999', '1 3', 'linear', '6', '-2.0  0.0',
               '-0.5  0.0', '-0.5 -10.0', ' 0.5 -10.0', ' 0.5  0.0',
               ' 2.0  0.0']
@@ -26,87 +25,97 @@ as_cspline = ['1.0', '0.0 20.0 1999', '1 7', 'cspline', '12', ' 0.0 30.0',
               ' 9.0  2.4', '11.0  3.0', '13.0  3.4', '15.0  3.6', '19.0  3.79',
               '20.0  3.8']
 
+doublewell_cspline = ['4.0', '-20.0 20.0 1999', '1 10', 'cspline', '5',
+                      '-20.0 35.0', '-10.0  0.0', '  0.0  2.0', ' 10.0  0.0',
+                      ' 20.0 35.0']
+
 
 def schrodinger(arg):
+    """Creates discrete potentials from data provided by input and then solves
+    the one dimensional time independent schrodinger equation.
+
+
+    Args:
+        arg: A list of data provided by seqsolver_io.py from schrodinger.inp
+        which specifies the problem.
+
+
+    Returns:
+        Discrete 1D wavefunctions, the discrete potential,
+        all desired eigenvalues, expected values of the position operator <x>,
+        expected uncertainty when measuring position, all in .dat format
     """
-    Trying to realize the algorithm here
-    """
-    # Extracting data from input
-    mass = float(arg[0])
-    eigen = np.asarray(arg[2].split(" "), dtype=int)
+
     window = np.asarray(arg[1].split(" "), dtype=float)
-    delta = window[1]/int(window[2]-1)
-    a = 1/(mass*delta**2)
 
     # Creating empty arrays to fill with data
-    xVal = np.zeros(int(arg[4]), dtype=float)
-    yVal = np.zeros(int(arg[4]), dtype=float)
+    xpoint = np.zeros(int(arg[4]), dtype=float)
+    ypoint = np.zeros(int(arg[4]), dtype=float)
     potential = np.zeros(shape=(int(window[2]), 2), dtype=float)
-    xPot = np.linspace(window[0], window[1], int(window[2]))
+    xval = np.linspace(window[0], window[1], int(window[2]))
+
+    # Extracting data from input
+    eigen = np.asarray(arg[2].split(" "), dtype=int)
+    delta_sq = (abs(xval[1])-abs(xval[0]))**2
+    add = 1/(float(arg[0])*delta_sq)
 
     for i in range(5, len(arg)):  # Seperating x and y values of interp points
-        xVal[i-5] = np.asarray(arg[i].split())[0]
-        yVal[i-5] = np.asarray(arg[i].split())[1]
+        xpoint[i-5] = np.asarray(arg[i].split())[0]
+        ypoint[i-5] = np.asarray(arg[i].split())[1]
 
     if arg[3] == "linear":
-        yPot = np.interp(xPot, xVal, yVal)
-        for j in range(int(window[2])):  # Saving discrpot in desired format
-            potential[j, 0] = xPot[j]
-            potential[j, 1] = yPot[j]
-        np.savetxt("potential.dat", potential)
+        yval = np.interp(xval, xpoint, ypoint)
 
     elif arg[3] == "polynomial":
         deg = input("Please enter the degree of the fitting polynomial: ")
-        fit = np.polyfit(xVal, yVal, int(deg))
-        yPot = np.zeros(shape=int(window[2]), dtype=float)
-        for k in range(int(window[2])):
-            for l in range(int(deg)+1):  # assigning correct xVal to polyfit
-                yPot[k] += fit[l]*xPot[k]**(int(deg)-l)
-            potential[k, 0] = xPot[k]
-            potential[k, 1] = yPot[k]
-        np.savetxt("potential.dat", potential)
+        fit = np.polyfit(xpoint, ypoint, int(deg))
+        yval = np.zeros(shape=int(window[2]), dtype=float)
+        for j in range(int(window[2])):
+            for k in range(int(deg)+1):  # assigning correct xVal to polyfit
+                yval[j] += fit[k]*xval[j]**(int(deg)-k)
 
     elif arg[3] == "cspline":
-        tck = interpolate.splrep(xVal, yVal)  # Calc interp coefficients
-        yPot = interpolate.splev(xPot, tck)  # Evaluate discrete data at xPot
-        for ii in range(int(window[2])):
-            potential[ii, 0] = xPot[ii]
-            potential[ii, 1] = yPot[ii]
-        np.savetxt("potential.dat", potential)
+        tck = interpolate.splrep(xpoint, ypoint)  # Calc interp coefficients
+        yval = interpolate.splev(xval, tck)  # Evaluate discrete data at xVal
 
     else:
-        print("Error: Interpolation type not specified.")
+        print("Error: Interpolation type not correctly specified.")
 
+    for ii in range(int(window[2])):  # Saving discrpot in desired format
+        potential[ii, 0] = xval[ii]
+        potential[ii, 1] = yval[ii]
+    np.savetxt("potential.dat", potential)
+
+    # Filling matrix with data to solve with linalg.eigh_tridiagonal()
     diag = np.zeros(shape=int(window[2]), dtype=float)
     off_diag = np.zeros(shape=int(window[2])-1, dtype=float)
-    for n in range(int(window[2])):
-        diag[n] = a + potential[n, 1]
-    for m in range(int(window[2]-1)):
-        off_diag[m] = -0.5*a
+    for jj in range(int(window[2])):
+        diag[jj] = add + potential[jj, 1]
+    for kk in range(int(window[2]-1)):
+        off_diag[kk] = -0.5*add
 
     energies, wavefuncs = linalg.eigh_tridiagonal(diag, off_diag, select="i",
                                                   select_range=eigen-1)
     np.savetxt("energies.dat", energies)
-    wavefuncs_new = np.zeros(shape=(int(window[2]), eigen[1]+1), dtype=float)
-    for jj in range(int(window[2])):
-        wavefuncs_new[jj, 0] = xPot[jj]
-        for kk in range(eigen[1]):
-            wavefuncs_new[jj, kk+1] = wavefuncs[jj, kk]
-    np.savetxt("wavefuncs.dat", wavefuncs_new)
+    wave_new = np.zeros(shape=(int(window[2]), eigen[1]+1), dtype=float)
+    for ll in range(int(window[2])):
+        wave_new[ll, 0] = xval[ll]
+        for mm in range(eigen[1]):
+            wave_new[ll, mm+1] = wavefuncs[ll, mm]
+    np.savetxt("wavefuncs.dat", wave_new)
 
     x_expected = np.zeros(shape=eigen[1], dtype=float)
-    x_squared = np.zeros(shape=eigen[1], dtype=float)
-    x_uncertainty = np.zeros(shape=eigen[1], dtype=float)
+    x_squared, x_uncertainty = np.array(x_expected), np.array(x_expected)
     expvalues = np.zeros(shape=(eigen[1], 2), dtype=float)
-    for mm in range(eigen[1]):
-        for nn in range(int(window[2])):
-            x_expected[mm] += wavefuncs_new[nn, mm+1]*wavefuncs_new[nn, 0]*wavefuncs_new[nn, mm+1]
-            x_squared[mm] += wavefuncs_new[nn, mm+1]*wavefuncs_new[nn, 0]**2*wavefuncs_new[nn, mm+1]
-        x_uncertainty[mm] = (x_squared[mm] - x_expected[mm]**2)**0.5
-        expvalues[mm, 0], expvalues[mm, 1] = x_expected[mm], x_uncertainty[mm]
+
+    for nn in range(eigen[1]):
+        for oo in range(int(window[2])):
+            x_expected[nn] += wave_new[oo, nn+1]*xval[oo]*wave_new[oo, nn+1]
+            x_squared[nn] += wave_new[oo, nn+1]*xval[oo]**2*wave_new[oo, nn+1]
+        x_uncertainty[nn] = (x_squared[nn] - x_expected[nn]**2)**0.5
+        expvalues[nn, 0], expvalues[nn, 1] = x_expected[nn], x_uncertainty[nn]
     np.savetxt("expvalues.dat", expvalues)
-"""----I need to clean redundant variables and arrays----"""
 
 
-# if __name__ == '__main__':
-  # schrodinger(as_cspline)
+if __name__ == '__main__':
+    schrodinger(as_cspline)
