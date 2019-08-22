@@ -118,4 +118,4 @@ def schrodinger(arg):
 
 
 if __name__ == '__main__':
-    schrodinger(as_cspline)
+    schrodinger(harm_poly)

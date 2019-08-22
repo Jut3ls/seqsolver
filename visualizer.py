@@ -5,20 +5,26 @@ Main function for creating plots from data-files
 @author: Ruben
 """
 import numpy as np
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 
 def importdata(directory):
-    '''Function, which creates six arrays from given data:
-        energies_data
-        potential_xdata
-        potential_ydata
-        wavefuncs_data_x
-        wavefuncs_data_y [[y(x1)], ..., [y(xn)]]
-        expvalues_xdata
-        expvalues_ydata
-        '''
+    '''Function, which creates six arrays from potential.dat, energies.dat,
+    wavefunc.dat and expvalues.dat files.
 
+    Args:
+        directory: Argument containing the directory of input .dat files.
+
+    Returns:
+        energies_data: Array with energie data (eigenvalues).
+        potential_xdata: Array with potential x-data.
+        potential_ydata: Array with potential y-data.
+        wavefuncs_xdata: Array with wavefunction x-data.
+        wavefuncs_ydata: Array with wavefunction y-data
+                         [[y1(x1), y2(x1), ...], ..., [y1(xn), y2(xn), ...]].
+        expvalues_xdata: Array with expvalues x-data.
+        expvalues_ydata: Array with expvalues y-data.
+        '''
     energiesdir = ".\\" + directory + "\energies.dat"
     potentialdir = ".\\" + directory + "\potential.dat"
     wavefuncsdir = ".\\" + directory + "\wavefuncs.dat"
@@ -58,12 +64,64 @@ def importdata(directory):
             expvalues_xdata[j] = expvalues_rawdata[j, 0]
             expvalues_ydata[j] = expvalues_rawdata[j, 1]
 
-    return energies_data, potential_xdata, potential_ydata, wavefuncs_xdata
-           wavefuncs_ydata, expvalues_xdata, expvalues_ydata;
+    return(energies_data, potential_xdata, potential_ydata, wavefuncs_xdata,
+           wavefuncs_ydata, expvalues_xdata, expvalues_ydata)
 
+
+def make_plot(energies_data, potential_xdata, potential_ydata, wavefuncs_xdata,
+              wavefuncs_ydata, expvalues_xdata, expvalues_ydata):
+    '''Trying to make two plots from data createn by importdata-function.
+
+    Args:
+        energies_data: Array with energie data (eigenvalues).
+        potential_xdata: Array with potential x-data.
+        potential_ydata: Array with potential y-data.
+        wavefuncs_xdata: Array with wavefunction x-data.
+        wavefuncs_ydata: Array with wavefunction y-data
+                         [[y1(x1), y2(x1), ...], ..., [y1(xn), y2(xn), ...]].
+        expvalues_xdata: Array with expvalues x-data.
+        expvalues_ydata: Array with expvalues y-data.
+
+    Returns:
+        Plot saved as pdf or png file.
+    '''
+    plt.figure(figsize=(10, 10), dpi=80)
+
+    plt.subplot(1, 2, 1)  # plotting wavefunctions, energies and potential
+
+    # energy levels
+    for i in range(0, len(energies_data)):
+        x_energy = [wavefuncs_xdata[0], wavefuncs_xdata[len(wavefuncs_xdata)-1]]
+        y_energy = [energies_data[i], energies_data[i]]
+        plt.plot(x_energy, y_energy, linestyle="--", color="grey")
+
+    # wavefunctions
+    y_wave = np.zeros(len(wavefuncs_xdata), dtype=float)
+    for j in range(0, len(energies_data), 2):
+        for k in range(0, len(wavefuncs_xdata)):
+            y_wave[k] = wavefuncs_ydata[k, j] + energies_data[j]
+        plt.plot(wavefuncs_xdata, y_wave, linestyle="-", color="red")
+
+    for j in range(1, len(energies_data), 2):
+        for k in range(0, len(wavefuncs_xdata)):
+            y_wave[k] = wavefuncs_ydata[k, j] + energies_data[j]
+        plt.plot(wavefuncs_xdata, y_wave, linestyle="-", color="blue")
+    # potential
+    plt.plot(potential_xdata, potential_ydata, linestyle="-", color="black")
+
+    # format
+    plt.ylim(min(potential_ydata), energies_data[len(energies_data)-1] + 1)
+
+
+
+    #plt.savefig('test.pdf', format='pdf')
 
 directory = str()
 
-energies, pot_x, pot_y, wave_x, wave_y, exp_x, exp_y = importdata(directory)
+def plot(directory):
 
-print(energies_123, pot_1, pot_2, wave_1, wave_2, exp_1, exp_2)
+    (energies_data, potential_xdata, potential_ydata, wavefuncs_xdata,
+ wavefuncs_ydata, expvalues_xdata, expvalues_ydata) = importdata(directory)
+
+    make_plot(energies_data, potential_xdata, potential_ydata, wavefuncs_xdata,
+          wavefuncs_ydata, expvalues_xdata, expvalues_ydata)

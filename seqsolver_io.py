@@ -5,7 +5,7 @@ Main interface for reading and converting input data from schrodinger.inp
 
 import sys
 import eqnsolver
-
+import visualizer
 
 def main():
     """Main script functionality"""
@@ -28,6 +28,7 @@ def main():
 
     eqnsolver.schrodinger(data)
 
+    visualizer.plot(directory)
 
 if __name__ == '__main__':
     main()
