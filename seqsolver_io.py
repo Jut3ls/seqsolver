@@ -4,6 +4,7 @@ Main interface for reading and converting input data from schrodinger.inp
 """
 
 import sys
+import numpy as np
 import eqnsolver
 
 
@@ -26,7 +27,14 @@ def main():
             data[i] = data[i].split("\n")[0]
     fp.close()
 
-    eqnsolver.schrodinger(data)
+    discrpot = eqnsolver.discrpot(data)
+    eigenval, wfuncs = eqnsolver.solve_schrodinger(data, discrpot)
+    expval = eqnsolver.expected_values(data, wfuncs)
+
+    np.savetxt("potential.dat", discrpot)
+    np.savetxt("energies.dat", eigenval)
+    np.savetxt("wavefuncs.dat", wfuncs)
+    np.savetxt("expvalues.dat", expval)
 
 
 if __name__ == '__main__':
