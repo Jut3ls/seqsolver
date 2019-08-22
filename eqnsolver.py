@@ -125,4 +125,5 @@ def expected_values(data, wfuncs):
             x_squared[nn] += wfuncs[i, nn+1]*wfuncs[i, 0]**2*wfuncs[i, nn+1]
         x_uncertainty[nn] = (x_squared[nn] - x_expected[nn]**2)**0.5
         expvalues[nn, 0], expvalues[nn, 1] = x_expected[nn], x_uncertainty[nn]
+
     return expvalues

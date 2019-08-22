@@ -6,6 +6,7 @@ Main interface for reading and converting input data from schrodinger.inp
 import sys
 import numpy as np
 import eqnsolver
+import visualizer
 
 
 def main():
@@ -35,6 +36,8 @@ def main():
     np.savetxt("energies.dat", eigenval)
     np.savetxt("wavefuncs.dat", wfuncs)
     np.savetxt("expvalues.dat", expval)
+
+    visualizer.plot(directory)
 
 
 if __name__ == '__main__':
