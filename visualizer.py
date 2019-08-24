@@ -83,10 +83,11 @@ def make_plot(energies_data, potential_xdata, potential_ydata, wavefuncs_xdata,
         expvalues_ydata: Array with expvalues y-data.
 
     Returns:
-        Plot saved as pdf or png file.
+        Plot saved as pdf file.
     '''
     plt.figure(figsize=(10, 10), dpi=80)
 
+    # plot 1:
     plt.subplot(1, 2, 1)  # plotting wavefunctions, energies and potential
 
     # energy levels
@@ -106,22 +107,74 @@ def make_plot(energies_data, potential_xdata, potential_ydata, wavefuncs_xdata,
         for k in range(0, len(wavefuncs_xdata)):
             y_wave[k] = wavefuncs_ydata[k, j] + energies_data[j]
         plt.plot(wavefuncs_xdata, y_wave, linestyle="-", color="blue")
+
     # potential
     plt.plot(potential_xdata, potential_ydata, linestyle="-", color="black")
 
     # format
+    xlim_plot_wave_min = 0
+    xlim_plot_wave_max = max(expvalues_xdata) + max(expvalues_xdata) * 0.1
+    ylim_plot_wave_min = energies_data[0] - energies_data[0] * 0.1
+    ylim_plot_wave_max = (energies_data[len(energies_data)-1]
+                        + energies_data[len(energies_data)-1] * 0.1)
+
     plt.ylim(min(potential_ydata), energies_data[len(energies_data)-1] + 1)
+    plt.xlabel("x [Bohr]", size=16)
+    plt.ylabel("Energies [Hartree]", size=16)
+    plt.title("Potential, eigenstates", size=20)
 
 
 
-    #plt.savefig('test.pdf', format='pdf')
+    # plot 2:
+    plt.subplot(1, 2, 2)  # plotting energy levels and expvalues
+
+    # energy levels
+    for l in range(0, len(energies_data)):
+        x_energy = [wavefuncs_xdata[0], wavefuncs_xdata[len(wavefuncs_xdata)-1]]
+        y_energy = [energies_data[l], energies_data[l]]
+        plt.plot(x_energy, y_energy, linestyle="--", color="grey")
+
+    #expvalues
+    plt.plot(expvalues_xdata, expvalues_ydata,'g^', color="purple")
+
+    # format
+    xlim_plot_exp_min = 0
+    xlim_plot_exp_max = max(expvalues_xdata) + max(expvalues_xdata) * 0.1
+    ylim_plot_exp_min = energies_data[0] - energies_data[0] * 0.1
+    ylim_plot_exp_max = (energies_data[len(energies_data)-1]
+                        + energies_data[len(energies_data)-1] * 0.1)
+
+    plt.xlim(xlim_plot_exp_min, xlim_plot_exp_max)
+    plt.ylim(ylim_plot_exp_min, ylim_plot_exp_max)
+    plt.xlabel("[Bohr]", size=16)
+    plt.ylabel("Energies [Hartree]", size=16)
+    plt.title(r'$\sigma_x$', size=20)
+
+    plt.savefig('test.pdf', format='pdf')
+
+
+
+def plot(directory):
+    '''
+    Creates plot from given directory, with optional scaling adjustments and
+    save options.
+    Args:
+        directory: directory containing .dat files.
+
+    Returns:
+        Plot-file saved as pdf
+    '''
+
+    (energies_data, potential_xdata, potential_ydata, wavefuncs_xdata,
+     wavefuncs_ydata, expvalues_xdata, expvalues_ydata) = importdata(directory)
+
+    make_plot(energies_data, potential_xdata, potential_ydata, wavefuncs_xdata,
+              wavefuncs_ydata, expvalues_xdata, expvalues_ydata)
 
 directory = str()
 
-def plot(directory):
-
-    (energies_data, potential_xdata, potential_ydata, wavefuncs_xdata,
+(energies_data, potential_xdata, potential_ydata, wavefuncs_xdata,
  wavefuncs_ydata, expvalues_xdata, expvalues_ydata) = importdata(directory)
 
-    make_plot(energies_data, potential_xdata, potential_ydata, wavefuncs_xdata,
+make_plot(energies_data, potential_xdata, potential_ydata, wavefuncs_xdata,
           wavefuncs_ydata, expvalues_xdata, expvalues_ydata)
