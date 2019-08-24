@@ -23,7 +23,6 @@ def importdata(directory):
         wavefuncs_ydata: Array with wavefunction y-data
                          [[y1(x1), y2(x1), ...], ..., [y1(xn), y2(xn), ...]].
         expvalues_xdata: Array with expvalues x-data.
-        expvalues_ydata: Array with expvalues y-data.
         '''
     energiesdir = ".\\" + directory + "\energies.dat"
     potentialdir = ".\\" + directory + "\potential.dat"
@@ -56,20 +55,14 @@ def importdata(directory):
                 wavefuncs_ydata[n, m] = wavefuncs_rawdata[n, m+1]
 
     with open(str(expvaluesdir), "r"):
-        expvalues_rawdata = np.loadtxt(str(expvaluesdir))
-
-        expvalues_xdata = np.zeros(len(expvalues_rawdata), dtype=float)
-        expvalues_ydata = np.zeros(len(expvalues_rawdata), dtype=float)
-        for j in range(0, len(expvalues_rawdata)):
-            expvalues_xdata[j] = expvalues_rawdata[j, 0]
-            expvalues_ydata[j] = expvalues_rawdata[j, 1]
+        expvalues_data = np.loadtxt(str(expvaluesdir))
 
     return(energies_data, potential_xdata, potential_ydata, wavefuncs_xdata,
-           wavefuncs_ydata, expvalues_xdata, expvalues_ydata)
+           wavefuncs_ydata, expvalues_data)
 
 
-def make_plot(energies_data, potential_xdata, potential_ydata, wavefuncs_xdata,
-              wavefuncs_ydata, expvalues_xdata, expvalues_ydata):
+def auto_make_plot(energies_data, potential_xdata, potential_ydata, wavefuncs_xdata,
+              wavefuncs_ydata, expvalues_data):
     '''Trying to make two plots from data createn by importdata-function.
 
     Args:
@@ -92,7 +85,8 @@ def make_plot(energies_data, potential_xdata, potential_ydata, wavefuncs_xdata,
 
     # energy levels
     for i in range(0, len(energies_data)):
-        x_energy = [wavefuncs_xdata[0], wavefuncs_xdata[len(wavefuncs_xdata)-1]]
+        x_energy = [wavefuncs_xdata[0],
+                    wavefuncs_xdata[len(wavefuncs_xdata)-1]]
         y_energy = [energies_data[i], energies_data[i]]
         plt.plot(x_energy, y_energy, linestyle="--", color="grey")
 
@@ -111,19 +105,34 @@ def make_plot(energies_data, potential_xdata, potential_ydata, wavefuncs_xdata,
     # potential
     plt.plot(potential_xdata, potential_ydata, linestyle="-", color="black")
 
-    # format
-    xlim_plot_wave_min = 0
-    xlim_plot_wave_max = max(expvalues_xdata) + max(expvalues_xdata) * 0.1
-    ylim_plot_wave_min = energies_data[0] - energies_data[0] * 0.1
-    ylim_plot_wave_max = (energies_data[len(energies_data)-1]
-                        + energies_data[len(energies_data)-1] * 0.1)
+    # expecten values x
+    for m in range(0, len(expvalues_data)):
+        plt.plot(expvalues_data[m, 0], energies_data[m], 'x', markersize=10,
+                 color="purple")
 
-    plt.ylim(min(potential_ydata), energies_data[len(energies_data)-1] + 1)
+    # format
+    # setting some variables
+    xlim_plot_wave_min = min(potential_xdata)
+    xlim_plot_wave_max = max(potential_xdata)
+    ylim_plot_wave_min = (min(potential_ydata)
+                          - abs(min(potential_ydata)-0.5) * 0.1)
+    ylim_plot_wave_max = (energies_data[len(energies_data)-1]
+                          + energies_data[len(energies_data)-1] * 0.1)
+
+    # setting format
+    plt.xlim(xlim_plot_wave_min, xlim_plot_wave_max)
+    plt.ylim(ylim_plot_wave_min, ylim_plot_wave_max)
     plt.xlabel("x [Bohr]", size=16)
     plt.ylabel("Energies [Hartree]", size=16)
     plt.title("Potential, eigenstates", size=20)
-
-
+    plt.xticks(np.arange(round(xlim_plot_wave_min),
+                         round(xlim_plot_wave_max + 1),
+                         round(xlim_plot_wave_max) * 0.2),
+                         fontsize=12)
+    plt.yticks(np.arange(round(ylim_plot_wave_min),
+                         round(ylim_plot_wave_max),
+                         round(ylim_plot_wave_max) * 0.2),
+                         fontsize=12)
 
     # plot 2:
     plt.subplot(1, 2, 2)  # plotting energy levels and expvalues
@@ -134,23 +143,37 @@ def make_plot(energies_data, potential_xdata, potential_ydata, wavefuncs_xdata,
         y_energy = [energies_data[l], energies_data[l]]
         plt.plot(x_energy, y_energy, linestyle="--", color="grey")
 
-    #expvalues
-    plt.plot(expvalues_xdata, expvalues_ydata,'g^', color="purple")
+    # sigma
+    for m in range(0, len(expvalues_data)):
+        plt.plot(expvalues_data[m,1], energies_data[m], 'x', markersize=10,
+                 color="purple")
 
     # format
+    # setting some variables
     xlim_plot_exp_min = 0
-    xlim_plot_exp_max = max(expvalues_xdata) + max(expvalues_xdata) * 0.1
-    ylim_plot_exp_min = energies_data[0] - energies_data[0] * 0.1
-    ylim_plot_exp_max = (energies_data[len(energies_data)-1]
-                        + energies_data[len(energies_data)-1] * 0.1)
+    xlim_plot_exp_max = max(expvalues_data[0]) + max(expvalues_data[0]) * 0.1
+    ylim_plot_exp_min = ylim_plot_wave_min
+    ylim_plot_exp_max = ylim_plot_wave_max
 
+    # setting format
     plt.xlim(xlim_plot_exp_min, xlim_plot_exp_max)
     plt.ylim(ylim_plot_exp_min, ylim_plot_exp_max)
     plt.xlabel("[Bohr]", size=16)
     plt.ylabel("Energies [Hartree]", size=16)
     plt.title(r'$\sigma_x$', size=20)
 
-    plt.savefig('test.pdf', format='pdf')
+    # set universal tick range depending on x min/max, y min/max
+    plt.xticks(np.arange(round(xlim_plot_exp_min),
+                         round(xlim_plot_exp_max + 1),
+                         round(xlim_plot_exp_max ) * 0.25),
+                         fontsize=12)
+    plt.yticks(np.arange(round(ylim_plot_wave_min),
+                         round(ylim_plot_wave_max),
+                         round(ylim_plot_wave_max) * 0.2),
+                         fontsize=12)
+    #saving plot
+    plt.savefig('plots.pdf', format='pdf')
+    print("Plot image saved as plots.pdf")
 
 
 
@@ -166,15 +189,15 @@ def plot(directory):
     '''
 
     (energies_data, potential_xdata, potential_ydata, wavefuncs_xdata,
-     wavefuncs_ydata, expvalues_xdata, expvalues_ydata) = importdata(directory)
+     wavefuncs_ydata, expvalues_data) = importdata(directory)
 
     make_plot(energies_data, potential_xdata, potential_ydata, wavefuncs_xdata,
-              wavefuncs_ydata, expvalues_xdata, expvalues_ydata)
+              wavefuncs_ydata, expvalues_data)
 
 directory = str()
 
 (energies_data, potential_xdata, potential_ydata, wavefuncs_xdata,
- wavefuncs_ydata, expvalues_xdata, expvalues_ydata) = importdata(directory)
+ wavefuncs_ydata, expvalues_data) = importdata(directory)
 
-make_plot(energies_data, potential_xdata, potential_ydata, wavefuncs_xdata,
-          wavefuncs_ydata, expvalues_xdata, expvalues_ydata)
+auto_make_plot(energies_data, potential_xdata, potential_ydata, wavefuncs_xdata,
+          wavefuncs_ydata, expvalues_data)
