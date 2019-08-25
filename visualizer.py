@@ -151,16 +151,16 @@ def auto_make_plot(energies_data, potential_xdata, potential_ydata,
     plt.ylim(lim_wave[2], lim_wave[3])
     plt.xlabel("x [Bohr]", size=16)
     plt.ylabel("Energies [Hartree]", size=16)
-    plt.title("Potential, eigenstates", size=20)
+    plt.title("Potential, Eigenstates", size=20)
     plt.xticks(np.arange(round(lim_wave[0]),
                          round(lim_wave[1]),
-                         round(max(np.absolute([lim_wave[0],
-                                                lim_wave[1]]))) * 0.2),
-               fontsize=12)
+                         round((np.absolute(lim_wave[1] -
+                                            lim_wave[0])) + .5) * 0.2),
+               fontsize=12)  # +.5 to prevent round(...) = 0
     plt.yticks(np.arange(round(lim_wave[2]),
                          round(lim_wave[3]),
-                         round(max(np.absolute([lim_wave[2],
-                                                lim_wave[3]]))) * 0.2),
+                         round((np.absolute(lim_wave[3] -
+                                            lim_wave[2])) + .5) * 0.2),
                fontsize=12)
 
     # plot 2: ###################################################
@@ -196,16 +196,18 @@ def auto_make_plot(energies_data, potential_xdata, potential_ydata,
     plt.xlabel("[Bohr]", size=16)
     plt.title(r'$\sigma_x$', size=20)
 
+    print(lim_exp)
+
     # set universal tick range depending on x min/max, y min/max
     plt.xticks(np.arange(round(lim_exp[0]),
                          round(lim_exp[1]),
-                         round(max(np.absolute([lim_exp[0],
-                                                lim_exp[1]]))) * 0.2),
+                         round((np.absolute(lim_exp[1] -
+                                            lim_exp[0])) + .5) * 0.2),
                fontsize=12)
     plt.yticks(np.arange(round(lim_exp[2]),
                          round(lim_exp[3]),
-                         round(max(np.absolute([lim_exp[2],
-                                                lim_exp[3]]))) * 0.2),
+                         round((np.absolute(lim_exp[3] -
+                                            lim_exp[2])) + .5) * 0.2),
                fontsize=12)
 
     # saving plot
@@ -321,16 +323,16 @@ x-max, y-min, y-max], default = d)")
     plt.ylim(lim_wave[2], lim_wave[3])
     plt.xlabel("x [Bohr]", size=16)
     plt.ylabel("Energies [Hartree]", size=16)
-    plt.title("Potential, eigenstates", size=20)
+    plt.title("Potential, Eigenstates", size=20)
     plt.xticks(np.arange(round(lim_wave[0]),
                          round(lim_wave[1]),
-                         round(max(np.absolute([lim_wave[0],
-                                                lim_wave[1]]))) * 0.2),
+                         round((np.absolute(lim_wave[1] -
+                                            lim_wave[0])) + .5) * 0.2),
                fontsize=12)
     plt.yticks(np.arange(round(lim_wave[2]),
                          round(lim_wave[3]),
-                         round(max(np.absolute([lim_wave[2],
-                                                lim_wave[3]]))) * 0.2),
+                         round((np.absolute(lim_wave[3] -
+                                            lim_wave[2])) + .5) * 0.2),
                fontsize=12)
 
     # plot 2:
@@ -357,13 +359,13 @@ x-max, y-min, y-max], default = d)")
     # set universal tick range depending on x min/max, y min/max
     plt.xticks(np.arange(round(lim_exp[0]),
                          round(lim_exp[1]),
-                         round(max(np.absolute([lim_exp[0],
-                                                lim_exp[1]]))) * 0.2),
+                         round((np.absolute(lim_exp[1] -
+                                            lim_exp[0])) + .5) * 0.2),
                fontsize=12)
     plt.yticks(np.arange(round(lim_exp[2]),
                          round(lim_exp[3]),
-                         round(max(np.absolute([lim_exp[2],
-                                                lim_exp[3]]))) * 0.2),
+                         round((np.absolute(lim_exp[3] -
+                                            lim_exp[2])) + .5) * 0.2),
                fontsize=12)
 
     # saving plot
