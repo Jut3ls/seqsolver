@@ -37,7 +37,7 @@ def main():
     np.savetxt("wavefuncs.dat", wfuncs)
     np.savetxt("expvalues.dat", expval)
 
-    visualizer.plot(directory)
+    visualizer.visualizer_main(directory)
 
 
 if __name__ == '__main__':
