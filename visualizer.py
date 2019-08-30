@@ -196,8 +196,6 @@ def auto_make_plot(energies_data, potential_xdata, potential_ydata,
     plt.xlabel("[Bohr]", size=16)
     plt.title(r'$\sigma_x$', size=20)
 
-    print(lim_exp)
-
     # set universal tick range depending on x min/max, y min/max
     plt.xticks(np.arange(round(lim_exp[0]),
                          round(lim_exp[1]),
@@ -247,7 +245,7 @@ def manual_make_plot(energies_data, potential_xdata, potential_ydata,
     # set amplitude factor
     amplitude = 1
     input_amplitude = input("set amplitude (default: 1):")
-    amplitude = int(input_amplitude)
+    amplitude = float(input_amplitude)
 
     # setting manual limits of wave plot
     manual_limits = input("Set limits of wavefunction plot (format: [x-min,\

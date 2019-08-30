@@ -3,7 +3,6 @@
 Main interface for reading and converting input data from schrodinger.inp
 """
 
-import sys
 import numpy as np
 import eqnsolver
 import visualizer
@@ -13,19 +12,13 @@ def main():
     """Main script functionality"""
 
     directory = input("Please enter the directory of your input file:")
-    try:
-        fp = open(directory + r"\schrodinger.inp", "r")
-    except FileNotFoundError:
-        print("Can not open file {}".format("schrodinger.inp"))
-        print("Exiting...")
-        sys.exit(1)
-    else:
-        lines = fp.readlines()
-        data = []
-        for i in range(len(lines)):
-            data.append(lines[i].split("#")[0])
-            data[i] = data[i].split("\t")[0]
-            data[i] = data[i].split("\n")[0]
+    fp = open(directory + r"\schrodinger.inp", "r")
+    lines = fp.readlines()
+    data = []
+    for i in range(len(lines)):
+        data.append(lines[i].split("#")[0])
+        data[i] = data[i].split("\t")[0]
+        data[i] = data[i].split("\n")[0]
     fp.close()
 
     discrpot = eqnsolver.discrpot(data)
@@ -37,7 +30,15 @@ def main():
     np.savetxt("wavefuncs.dat", wfuncs)
     np.savetxt("expvalues.dat", expval)
 
-    visualizer.visualizer_main(directory)
+    plotinp = input("Should the generated data be visualized? [y/n]: ")
+    if plotinp == "y":
+        visualdir = input(
+            "Please enter the directory of the data that should be plotted:")
+        visualizer.visualizer_main(visualdir)
+    elif plotinp == "n":
+        print("Data will not be visualized.")
+    else:
+        print("Could not understand your input. Data will not be visualized.")
 
 
 if __name__ == '__main__':
