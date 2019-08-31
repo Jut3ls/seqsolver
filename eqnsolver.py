@@ -6,7 +6,7 @@ import numpy as np
 from scipy import interpolate, linalg
 
 
-def discrpot(data):
+def discrpot(data, deg=None):
     """Creates discrete potentials from data provided by input file.
     The interpolation type is specified by the user in the input file.
 
@@ -15,9 +15,12 @@ def discrpot(data):
         data: List of data that specifies the problem, sets interpolation
         points and declares the interpolation type.
 
+        deg: (optional) Only for polynomial interpolation.
+        If omitted, the script will ask for an input later. Default=None.
+
 
     Returns:
-        Array containing the discrete potential.
+        potential: Array containing the discrete potential.
     """
 
     window = np.asarray(data[1].split(" "), dtype=float)
@@ -36,7 +39,8 @@ def discrpot(data):
         yval = np.interp(xval, xpoint, ypoint)
 
     if data[3] == "polynomial":
-        deg = input("Please enter the degree of the fitting polynomial: ")
+        if deg is None:
+            deg = input("Please enter the degree of the fitting polynomial: ")
         fit = np.polyfit(xpoint, ypoint, int(deg))
         yval = np.zeros(shape=int(window[2]), dtype=float)
         for j in range(int(window[2])):

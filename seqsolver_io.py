@@ -30,7 +30,7 @@ def main():
     np.savetxt("wavefuncs.dat", wfuncs)
     np.savetxt("expvalues.dat", expval)
 
-    plotinp = input("Should the generated data be visualized? [y/n]: ")
+    plotinp = input("Do you want to visualize your data? [y/n]: ")
     if plotinp == "y":
         visualdir = input(
             "Please enter the directory of the data that should be plotted:")
