@@ -30,9 +30,16 @@ def main():
     np.savetxt("wavefuncs.dat", wfuncs)
     np.savetxt("expvalues.dat", expval)
 
-    plotinp = input("Do you want to visualize your data? [y/n]: ")
+    plotinp = input("Do you want to visualize your data? [y/n]:")
     if plotinp == "y":
-        visualizer.visualizer_main()
+        visualdir = str()
+        use_generated_data = input("Use created data? [y/n]:")
+        if use_generated_data == "y":
+            visualizer.visualizer_main(visualdir)
+        else:
+            visualdir = input("Please enter the directory\
+ of the data that should be plotted:")
+            visualizer.visualizer_main(visualdir)
     else:
         print("Data will not be visualized.")
 

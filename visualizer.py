@@ -8,7 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def visualizer_main():
+def visualizer_main(directory):
     '''
     Creates plot from given directory, with optional scaling adjustments and
     save options.
@@ -18,7 +18,6 @@ def visualizer_main():
     Returns:
         Plot-file saved as "plots.pdf"
     '''
-    directory = str()
 
     # import data:
     (energies_data, potential_xdata, potential_ydata, wavefuncs_xdata,
