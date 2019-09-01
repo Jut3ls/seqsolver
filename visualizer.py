@@ -8,7 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def visualizer_main(directory):
+def visualizer_main():
     '''
     Creates plot from given directory, with optional scaling adjustments and
     save options.
@@ -18,22 +18,26 @@ def visualizer_main(directory):
     Returns:
         Plot-file saved as "plots.pdf"
     '''
+    directory = str()
+
     # import data:
     (energies_data, potential_xdata, potential_ydata, wavefuncs_xdata,
-     wavefuncs_ydata, expvalues_data) = importdata(directory)
+     wavefuncs_ydata, expvalues_data) = _importdata(directory)
 
     # make plot automaticly:
-    auto_make_plot(energies_data, potential_xdata, potential_ydata,
-                   wavefuncs_xdata, wavefuncs_ydata, expvalues_data)
+    _auto_make_plot(energies_data, potential_xdata, potential_ydata,
+                    wavefuncs_xdata, wavefuncs_ydata, expvalues_data)
 
     # manually adjust scale:
     adjust_limits = input("Manually adjust limits and amplitude? [y/n]")
     if str(adjust_limits) == "y":
-        manual_make_plot(energies_data, potential_xdata, potential_ydata,
-                         wavefuncs_xdata, wavefuncs_ydata, expvalues_data)
+        _manual_make_plot(energies_data, potential_xdata, potential_ydata,
+                          wavefuncs_xdata, wavefuncs_ydata, expvalues_data)
+    else:
+        print("Plot created!")
 
 
-def importdata(directory):
+def _importdata(directory):
     '''Function, which creates six arrays from potential.dat, energies.dat,
     wavefunc.dat and expvalues.dat files.
 
@@ -86,8 +90,8 @@ def importdata(directory):
            wavefuncs_ydata, expvalues_data)
 
 
-def auto_make_plot(energies_data, potential_xdata, potential_ydata,
-                   wavefuncs_xdata, wavefuncs_ydata, expvalues_data):
+def _auto_make_plot(energies_data, potential_xdata, potential_ydata,
+                    wavefuncs_xdata, wavefuncs_ydata, expvalues_data):
     '''Trying to make two plots from data createn by importdata-function.
 
     Args:
@@ -147,21 +151,10 @@ def auto_make_plot(energies_data, potential_xdata, potential_ydata,
         lim_wave[3] = 0.1 * abs(min(lim_wave))
 
     # setting format
-    plt.xlim(lim_wave[0], lim_wave[1])
-    plt.ylim(lim_wave[2], lim_wave[3])
     plt.xlabel("x [Bohr]", size=16)
     plt.ylabel("Energies [Hartree]", size=16)
     plt.title("Potential, Eigenstates", size=20)
-    plt.xticks(np.arange(round(lim_wave[0]),
-                         round(lim_wave[1]),
-                         round((np.absolute(lim_wave[1] -
-                                            lim_wave[0])) + .5) * 0.2),
-               fontsize=12)  # +.5 to prevent round(...) = 0
-    plt.yticks(np.arange(round(lim_wave[2]),
-                         round(lim_wave[3]),
-                         round((np.absolute(lim_wave[3] -
-                                            lim_wave[2])) + .5) * 0.2),
-               fontsize=12)
+    _format(lim_wave)
 
     # plot 2: ###################################################
     plt.subplot(1, 2, 2)  # plotting energy levels and exp-values
@@ -191,30 +184,17 @@ def auto_make_plot(energies_data, potential_xdata, potential_ydata,
                lim_wave[3]]
 
     # setting format
-    plt.xlim(lim_exp[0], lim_exp[1])
-    plt.ylim(lim_exp[2], lim_exp[3])
     plt.xlabel("[Bohr]", size=16)
     plt.title(r'$\sigma_x$', size=20)
-
-    # set universal tick range depending on x min/max, y min/max
-    plt.xticks(np.arange(round(lim_exp[0]),
-                         round(lim_exp[1]),
-                         round((np.absolute(lim_exp[1] -
-                                            lim_exp[0])) + .5) * 0.2),
-               fontsize=12)
-    plt.yticks(np.arange(round(lim_exp[2]),
-                         round(lim_exp[3]),
-                         round((np.absolute(lim_exp[3] -
-                                            lim_exp[2])) + .5) * 0.2),
-               fontsize=12)
+    _format(lim_exp)
 
     # saving plot
     plt.savefig('plots.pdf', format='pdf')
     print("Plot image saved as plots.pdf")
 
 
-def manual_make_plot(energies_data, potential_xdata, potential_ydata,
-                     wavefuncs_xdata, wavefuncs_ydata, expvalues_data):
+def _manual_make_plot(energies_data, potential_xdata, potential_ydata,
+                      wavefuncs_xdata, wavefuncs_ydata, expvalues_data):
     '''Making two plots with manual set amplitude and limits.
 
     Args:
@@ -242,6 +222,40 @@ def manual_make_plot(energies_data, potential_xdata, potential_ydata,
     if abs(lim_wave[3]) <= 0.5:
         lim_wave[3] = 0.1 * abs(min(lim_wave))
 
+    # plot 2:
+    x_max_exp = np.zeros(len(expvalues_data), dtype=float)
+    for i in range(len(expvalues_data)):
+        x_max_exp[i] = expvalues_data[i, 1]
+
+    lim_exp = [0,
+               max(x_max_exp) + max(x_max_exp) * 0.1,
+               lim_wave[2],
+               lim_wave[3]]
+
+    # make plots:
+    plt.figure(figsize=(10, 10), dpi=80)
+
+    # plot 2:
+    plt.subplot(1, 2, 2)  # plotting energy levels and exp-values
+
+    # energy levels
+    for y_energy_data in energies_data:
+        x_energy = [wavefuncs_xdata[0],
+                    wavefuncs_xdata[len(wavefuncs_xdata)-1]]
+        y_energy = [y_energy_data, y_energy_data]
+        plt.plot(x_energy, y_energy, linestyle="--", color="grey")
+
+    # exp-values (sigma)
+    for m in range(0, len(expvalues_data)):
+        plt.plot(expvalues_data[m, 1], energies_data[m], 'x', markersize=10,
+                 color="purple")
+
+    # setting format
+    plt.xlabel("[Bohr]", size=16)
+    plt.title(r'$\sigma_x$', size=20)
+    _format(lim_exp)
+
+    # plot 1
     # set amplitude factor
     amplitude = 1
     input_amplitude = input("set amplitude (default: 1):")
@@ -256,37 +270,7 @@ x-max, y-min, y-max], default = d)")
         if manual_lim_wave[i].lstrip('-').isdigit():
             lim_wave[i] = int(manual_lim_wave[i])
 
-    # plot 2:
-    # setting some variables
-    x_max_exp = np.zeros(len(expvalues_data), dtype=float)
-    for i in range(len(expvalues_data)):
-        x_max_exp[i] = expvalues_data[i, 1]
-
-    # lim_exp = [x_min, x_max, y_min, y_max]
-    lim_exp = [0,
-               max(x_max_exp) + max(x_max_exp) * 0.1,
-               lim_wave[2],
-               lim_wave[3]]
-
-    # setting manual limits of expvalues plot
-    warning = "Important! The default limits of expvalues-plot are generated\
-by the limits of the wave plot. If limits of wave-plot are changed, the\
- default limits of expvalues-plot are changed aswell"
-
-    print(str(warning))
-
-    manual_limits = input("Set limits of wavefunction plot (format: [x-min,\
-x-max, y-min, y-max], default = d)")
-
-    manual_lim_exp = manual_limits.split(", ")
-
-    for i in range(len(manual_lim_wave)):
-        if manual_lim_exp[i].isdigit():
-            lim_exp[i] = int(manual_lim_exp[i])
-
-    plt.figure(figsize=(10, 10), dpi=80)
-
-    # plot 1:
+    # make plot:
     plt.subplot(1, 2, 1)  # plotting wavefunctions, energies and potential
 
     # energy levels
@@ -317,55 +301,27 @@ x-max, y-min, y-max], default = d)")
                  color="purple")
 
     # setting format
-    plt.xlim(lim_wave[0], lim_wave[1])
-    plt.ylim(lim_wave[2], lim_wave[3])
     plt.xlabel("x [Bohr]", size=16)
     plt.ylabel("Energies [Hartree]", size=16)
-    plt.title("Potential, Eigenstates", size=20)
-    plt.xticks(np.arange(round(lim_wave[0]),
-                         round(lim_wave[1]),
-                         round((np.absolute(lim_wave[1] -
-                                            lim_wave[0])) + .5) * 0.2),
-               fontsize=12)
-    plt.yticks(np.arange(round(lim_wave[2]),
-                         round(lim_wave[3]),
-                         round((np.absolute(lim_wave[3] -
-                                            lim_wave[2])) + .5) * 0.2),
-               fontsize=12)
-
-    # plot 2:
-    plt.subplot(1, 2, 2)  # plotting energy levels and exp-values
-
-    # energy levels
-    for y_energy_data in energies_data:
-        x_energy = [wavefuncs_xdata[0],
-                    wavefuncs_xdata[len(wavefuncs_xdata)-1]]
-        y_energy = [y_energy_data, y_energy_data]
-        plt.plot(x_energy, y_energy, linestyle="--", color="grey")
-
-    # exp-values (sigma)
-    for m in range(0, len(expvalues_data)):
-        plt.plot(expvalues_data[m, 1], energies_data[m], 'x', markersize=10,
-                 color="purple")
-
-    # setting format
-    plt.xlim(lim_exp[0], lim_exp[1])
-    plt.ylim(lim_exp[2], lim_exp[3])
-    plt.xlabel("[Bohr]", size=16)
-    plt.title(r'$\sigma_x$', size=20)
-
-    # set universal tick range depending on x min/max, y min/max
-    plt.xticks(np.arange(round(lim_exp[0]),
-                         round(lim_exp[1]),
-                         round((np.absolute(lim_exp[1] -
-                                            lim_exp[0])) + .5) * 0.2),
-               fontsize=12)
-    plt.yticks(np.arange(round(lim_exp[2]),
-                         round(lim_exp[3]),
-                         round((np.absolute(lim_exp[3] -
-                                            lim_exp[2])) + .5) * 0.2),
-               fontsize=12)
+    plt.title("Potential, Eigenstates\nAmplitude {}"
+              .format(amplitude), size=20)
+    _format(lim_wave)
 
     # saving plot
     plt.savefig('manual_plots.pdf', format='pdf')
     print("Plot image saved as manual_plots.pdf")
+
+
+def _format(array):
+    plt.xlim(array[0], array[1])
+    plt.ylim(array[2], array[3])
+    plt.xticks(np.arange(round(array[0]),
+                         round(array[1]) + 0.0001,
+                         round((np.absolute(array[1] -
+                                            array[0])) + .5) * 0.2),
+               fontsize=12)
+    plt.yticks(np.arange(round(array[2]),
+                         round(array[3]) + 0.0001,
+                         round((np.absolute(array[3] -
+                                            array[2])) + .5) * 0.2),
+               fontsize=12)

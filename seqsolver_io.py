@@ -32,13 +32,9 @@ def main():
 
     plotinp = input("Do you want to visualize your data? [y/n]: ")
     if plotinp == "y":
-        visualdir = input(
-            "Please enter the directory of the data that should be plotted:")
-        visualizer.visualizer_main(visualdir)
-    elif plotinp == "n":
-        print("Data will not be visualized.")
+        visualizer.visualizer_main()
     else:
-        print("Could not understand your input. Data will not be visualized.")
+        print("Data will not be visualized.")
 
 
 if __name__ == '__main__':
