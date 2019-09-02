@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Routines for solving the one dimensional time independent schrodinger
-equation for any given potential."""
+equation for any given potential. Functions are designed to be used together
+and in their respective order."""
 
 import numpy as np
 from scipy import interpolate, linalg
