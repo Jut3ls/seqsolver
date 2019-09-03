@@ -19,7 +19,7 @@ def main():
     what_to_do = input("Please select one of the options above: ")
 
     if what_to_do == "1" or what_to_do == "2":
-        directory = input("Please enter the directory of your input file:")
+        directory = input("Please enter the directory of your input file: ")
         fp = open(directory + r"\schrodinger.inp", "r")
         lines = fp.readlines()
         data = []
@@ -42,8 +42,8 @@ def main():
             visualize(".")
 
     elif what_to_do == "3":
-        visualdir = input("Please enter th directory of the data\
-                          that should be visualized: ")
+        visualdir = input("Please enter the directory of the data ds"
+                          "that should be visualized: ")
         visualize(visualdir)
 
     else:

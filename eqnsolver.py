@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Routines for solving the one dimensional time independent schrodinger
-equation for any given potential. Functions are designed to be used together
-and in their respective order."""
+equation for any given potential. Functions are designed to be used together.
+"""
 
 import numpy as np
 from scipy import interpolate, linalg
@@ -32,7 +32,7 @@ def discrpot(data, deg=None):
     potential = np.zeros(shape=(int(window[2]), 2), dtype=float)
     xval = np.linspace(window[0], window[1], int(window[2]))
 
-    for i in range(5, len(data)):  # Seperating x and y values of interp points
+    for i in range(5, len(data)):  # Seperating x and y values of points
         xpoint[i-5] = np.asarray(data[i].split())[0]
         ypoint[i-5] = np.asarray(data[i].split())[1]
 
@@ -49,8 +49,9 @@ def discrpot(data, deg=None):
                 yval[j] += fit[k]*xval[j]**(int(deg)-k)
 
     if data[3] == "cspline":
-        tck = interpolate.splrep(xpoint, ypoint)  # Find the spline repres.
-        yval = interpolate.splev(xval, tck)  # Evaluate discrete data at xVal
+        # Interp. data with piecewise cubic poly. with natural boundry cond.
+        spline = interpolate.CubicSpline(xpoint, ypoint, bc_type="natural")
+        yval = spline.__call__(xval)  # Evaluate spline at x
 
     for ii in range(int(window[2])):
         potential[ii, 0] = xval[ii]
@@ -101,7 +102,8 @@ def solve_schrodinger(data, pot):
 
 
 def expected_values(data, wfuncs):
-    """String
+    """Calculates the expected uncertainty of the position operator and
+    the expected uncertainty when measuring the position.
 
 
     Args:

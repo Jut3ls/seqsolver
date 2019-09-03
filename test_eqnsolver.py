@@ -8,39 +8,31 @@ import pytest
 import eqnsolver
 
 _TOL = 1e-10
-_DIR = ["inf", "as", "harmonic", "fin", "dl"]
+_DIR = ["inf", "as", "harmonic", "fin", "dl", "cdl"]
 
 
-def _get_input(pos):
-    """Get input of the reference files"""
-    for i in range(int(pos)):
-        fp = open(r"tests/ref_{}/{}.inp".format(_DIR[i], _DIR[i]))
-        lines = fp.readlines()
-        data = []
-        pot_exp = np.loadtxt("tests/ref_{}/potential_{}.dat".format(_DIR[i],
-                                                                    _DIR[i]))
-        eig_exp = np.loadtxt("tests/ref_{}/energies_{}.dat".format(_DIR[i],
-                                                                   _DIR[i]))
-        for ii in range(len(lines)):
-            data.append(lines[ii].split("#")[0])
-            data[ii] = data[ii].split("\t")[0]
-            data[ii] = data[ii].split("\n")[0]
+@pytest.mark.parametrize("dir1", _DIR)
+def test_parametrized(dir1):
+    """Testing all the problems at once using directory as parameter"""
+
+    fp = open(r"tests/ref_{arg}/{arg}.inp".format(arg=dir1))
+    lines = fp.readlines()
+    data = []
+
+    exppot = np.loadtxt("tests/ref_{arg}/potential_{arg}.dat".format(arg=dir1))
+    expeig = np.loadtxt("tests/ref_{arg}/energies_{arg}.dat".format(arg=dir1))
+
+    for ii in range(len(lines)):
+        data.append(lines[ii].split("#")[0])
+        data[ii] = data[ii].split("\t")[0]
+        data[ii] = data[ii].split("\n")[0]
     fp.close()
-    return data, pot_exp, eig_exp
 
+    recpot = eqnsolver.discrpot(data, 2)
+    receig = eqnsolver.solve_schrodinger(data, recpot)[0]
 
-def test_all():
-    """Test all the potentials and energies by iterating"""
-    for j in range(len(_DIR)):
-        print("\nTest {}".format(j+1))
-
-        data, pot_expected, eigen_expected = _get_input(j+1)
-
-        pot_rec = eqnsolver.discrpot(data, 2)
-        eigen_rec = eqnsolver.solve_schrodinger(data, pot_rec)[0]
-
-        assert np.all(np.abs(pot_rec - pot_expected) < _TOL)
-        assert np.all(np.abs(eigen_rec - eigen_expected) < _TOL)
+    assert np.all(np.abs(recpot - exppot) < _TOL)
+    assert np.all(np.abs(receig - expeig) < _TOL)
 
 
 if __name__ == '__main__':
