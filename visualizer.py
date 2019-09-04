@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Main function for creating plots from data-files
+Main routines for creating plots from output-files
 
 @author: Ruben
 """
@@ -37,21 +37,7 @@ def visualizer_main(directory):
 
 
 def _importdata(directory):
-    '''Function, which creates six arrays from potential.dat, energies.dat,
-    wavefunc.dat and expvalues.dat files.
 
-    Args:
-        directory: Argument containing the directory of input .dat files.
-
-    Returns:
-        energies_data: Array with energie data (eigenvalues).
-        potential_xdata: Array with potential x-data.
-        potential_ydata: Array with potential y-data.
-        wavefuncs_xdata: Array with wavefunction x-data.
-        wavefuncs_ydata: Array with wavefunction y-data
-                         [[y1(x1), y2(x1), ...], ..., [y1(xn), y2(xn), ...]].
-        expvalues_xdata: Array with expvalues x-data.
-        '''
     energiesdir = "./" + directory + "/energies.dat"
     potentialdir = "./" + directory + "/potential.dat"
     wavefuncsdir = "./" + directory + "/wavefuncs.dat"
@@ -91,21 +77,7 @@ def _importdata(directory):
 
 def _auto_make_plot(energies_data, potential_xdata, potential_ydata,
                     wavefuncs_xdata, wavefuncs_ydata, expvalues_data):
-    '''Trying to make two plots from data createn by importdata-function.
 
-    Args:
-        energies_data: Array with energie data (eigenvalues).
-        potential_xdata: Array with potential x-data.
-        potential_ydata: Array with potential y-data.
-        wavefuncs_xdata: Array with wavefunction x-data.
-        wavefuncs_ydata: Array with wavefunction y-data
-                         [[y1(x1), y2(x1), ...], ..., [y1(xn), y2(xn), ...]].
-        expvalues_xdata: Array with expvalues x-data.
-        expvalues_ydata: Array with expvalues y-data.
-
-    Returns:
-        Plot saved as pdf file.
-    '''
     plt.figure(figsize=(10, 10), dpi=80)
 
     # plot 1:
@@ -147,7 +119,7 @@ def _auto_make_plot(energies_data, potential_xdata, potential_ydata,
                 (energies_data[len(energies_data)-1] +
                  energies_data[len(energies_data)-1] * 0.1)]
     if abs(lim_wave[3]) <= 0.5:
-        lim_wave[3] = 0.1 * abs(min(lim_wave))
+        lim_wave[3] = lim_wave[3] + 0.25
 
     # setting format
     plt.xlabel("x [Bohr]", size=16)
@@ -194,32 +166,18 @@ def _auto_make_plot(energies_data, potential_xdata, potential_ydata,
 
 def _manual_make_plot(energies_data, potential_xdata, potential_ydata,
                       wavefuncs_xdata, wavefuncs_ydata, expvalues_data):
-    '''Making two plots with manual set amplitude and limits.
 
-    Args:
-        energies_data: Array with energie data (eigenvalues).
-        potential_xdata: Array with potential x-data.
-        potential_ydata: Array with potential y-data.
-        wavefuncs_xdata: Array with wavefunction x-data.
-        wavefuncs_ydata: Array with wavefunction y-data
-                         [[y1(x1), y2(x1), ...], ..., [y1(xn), y2(xn), ...]].
-        expvalues_xdata: Array with expvalues x-data.
-        expvalues_ydata: Array with expvalues y-data.
-
-    Returns:
-        Manual created plot saved as pdf file.
-    '''
     # set manual limits and amplitude factor
 
     # format (variables)
     # plot 1:
     lim_wave = [min(potential_xdata),
                 max(potential_xdata),
-                min(potential_ydata) - abs(min(potential_ydata)-0.5) * 0.1,
+                (min(potential_ydata) - abs(min(potential_ydata)-0.5) * 0.1),
                 (energies_data[len(energies_data)-1] +
                  energies_data[len(energies_data)-1] * 0.1)]
     if abs(lim_wave[3]) <= 0.5:
-        lim_wave[3] = 0.1 * abs(min(lim_wave))
+        lim_wave[3] = lim_wave[3] + 0.25
 
     # plot 2:
     x_max_exp = np.zeros(len(expvalues_data), dtype=float)
@@ -232,8 +190,8 @@ def _manual_make_plot(energies_data, potential_xdata, potential_ydata,
     amplitude = float(input_amplitude)
 
     # setting manual limits of wave plot
-    manual_limits = input("Set limits of wavefunction plot (format: [x-min,\
-x-max, y-min, y-max], default = d):")
+    manual_limits = input("Set limits of wavefunction plot (format: [x-min, "
+                          "x-max, y-min, y-max], default = d):")
     manual_lim_wave = manual_limits.split(", ")
 
     for i in range(len(lim_wave)):
