@@ -1,15 +1,32 @@
 #!/usr/bin/env python3
 """
-Main interface for reading and converting input data from schrodinger.inp
+Main user interface for reading and converting input data from schrodinger.inp
 """
 
 import numpy as np
-import eqnsolver
-from visualizer import visualizer_main as visualize
+from eqnsolver import solve
+from visualizer import visualize
 
 
 def main():
-    """Main script functionality"""
+    """Calls eqnsolver.solve() and visualizer.visualize() in a different manner
+    depending on user input. User can choose between one of these tree
+    options:
+
+    *1: Solve the 1D SEQ*:
+        Converts schrodinger.inp input data to a list and calls
+        eqnsolver.solve() with that list as an argument, then saves the
+        returned values as .dat output files.
+    *2: Solve the 1D SEQ and visualize the created data*:
+        Runs the same routines as option 1, but also calls
+        visualizer.visualize() to visualize the data obtained by
+        eqnsolver.solve().
+    *3: Visualize your own data*:
+        Only calls visualizer.visualize to plot existing data from a given
+        directory if .dat files follow the 'potential', 'wavefuncs', 'eigenval'
+        and 'expval' naming convention.
+
+    """
 
     print("What do you want to do?\n")
     print("1: Solve the 1D SEQ")
@@ -29,9 +46,7 @@ def main():
             data[i] = data[i].split("\n")[0]
         fp.close()
 
-        discrpot = eqnsolver.discrpot(data)
-        eigenval, wfuncs = eqnsolver.solve_schrodinger(data, discrpot)
-        expval = eqnsolver.expected_values(data, wfuncs)
+        discrpot, eigenval, wfuncs, expval = solve(data)
 
         np.savetxt("potential.dat", discrpot)
         np.savetxt("energies.dat", eigenval)

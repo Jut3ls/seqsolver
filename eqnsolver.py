@@ -1,28 +1,43 @@
 # -*- coding: utf-8 -*-
 """Routines for solving the one dimensional time independent schrodinger
-equation for any given potential. Functions are designed to be used together.
+equation for any given potential specified by input data.
 """
 
 import numpy as np
 from scipy import interpolate, linalg
 
 
-def discrpot(data, deg=None):
-    """Creates discrete potentials from data provided by input file.
-    The interpolation type is specified by the user in the input file.
+def solve(inp):
+    """Creates discrete potentials from data provided by input file, then
+    solves the discretized 1D SEQ and calculates derived units from discrete
+    eigenfunctions.
 
 
-    Args:
-        data: List of data that specifies the problem, sets interpolation
-        points and declares the interpolation type.
-
-        deg: (optional) Only for polynomial interpolation.
-        If omitted, the script will ask for an input later. Default=None.
+    :param inp: List of data created from schrodinger.inp by\
+    seqsolver_io.main() that specifies the potential, sets interpolation\
+    points and declares the interpolation type.
 
 
-    Returns:
-        potential: Array containing the discrete potential.
+    :return: **pot:** Array containing the discrete potential.
+
+        **energies:** The desired eigenvalues of each wavefunction
+
+        **wavefuncs:** Array containing the eigenfunctions of the discretized
+        schrodinger equation.
+
+        **expval:** Two-column array that contains the expected uncertainty of
+        the position operator in the first, and expected uncertainty
+        when measuring the position in the second column.
     """
+
+    pot = _discrpot(inp)
+    energies, wavefuncs = _solve_schrodinger(inp, pot)
+    expval = _expected_values(inp, wavefuncs)
+
+    return pot, energies, wavefuncs, expval
+
+
+def _discrpot(data, deg=None):
 
     window = np.asarray(data[1].split(" "), dtype=float)
 
@@ -59,22 +74,7 @@ def discrpot(data, deg=None):
     return potential
 
 
-def solve_schrodinger(data, pot):
-    """Solves the 1D time independent schrodinger equation by discretizing it.
-
-
-    Args:
-        data: List of data that specifies the problem, sets interpolation
-        points and declares the interpolation type.
-
-        pot: Array of shape (nPoint, 2) which contains a discrete potential
-
-
-    Returns:
-        energies: The eigenvalues of the wavefunctions in an array
-
-        wave_new: Array containing the eigenfunctions of the discretized SEQ
-    """
+def _solve_schrodinger(data, pot):
 
     window = np.asarray(data[1].split(" "), dtype=float)
     eigen = np.asarray(data[2].split(" "), dtype=int)
@@ -101,23 +101,7 @@ def solve_schrodinger(data, pot):
     return energies, wave_new
 
 
-def expected_values(data, wfuncs):
-    """Calculates the expected uncertainty of the position operator and
-    the expected uncertainty when measuring the position.
-
-
-    Args:
-        data: List of data that specifies the problem, sets interpolation
-        points and declares the interpolation type.
-
-        wfuncs: Array containing the discrete eigenfunctions of the 1D SEQ
-
-
-    Returns:
-        expvalues: Two-column array that contains the expected uncertainty of
-        the position operator in the first, and expected uncertainty when
-        measuring the position in the second column.
-    """
+def _expected_values(data, wfuncs):
 
     window = np.asarray(data[1].split(" "), dtype=float)
     eigenval = np.asarray(data[2].split(" "), dtype=int)

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Contains routines to test the eqnsolver module
+Contains routines to test the eqnsolver module.
 """
 
 import numpy as np
@@ -13,7 +13,14 @@ _DIR = ["inf", "as", "harmonic", "fin", "dl", "cdl"]
 
 @pytest.mark.parametrize("dir1", _DIR)
 def test_parametrized(dir1):
-    """Testing all the problems at once using directory as parameter"""
+    """Testing the eqnsolver module for a set of six reference potentials and
+    eigenvalues. Test can be executed from shell.
+
+
+    :param dir1: Internal list of directories leading to the reference files\
+    used for parametrization by pytest.
+
+    """
 
     fp = open(r"tests/ref_{arg}/{arg}.inp".format(arg=dir1))
     lines = fp.readlines()
@@ -28,8 +35,8 @@ def test_parametrized(dir1):
         data[ii] = data[ii].split("\n")[0]
     fp.close()
 
-    recpot = eqnsolver.discrpot(data, 2)
-    receig = eqnsolver.solve_schrodinger(data, recpot)[0]
+    recpot = eqnsolver._discrpot(data, 2)
+    receig = eqnsolver._solve_schrodinger(data, recpot)[0]
 
     assert np.all(np.abs(recpot - exppot) < _TOL)
     assert np.all(np.abs(receig - expeig) < _TOL)
