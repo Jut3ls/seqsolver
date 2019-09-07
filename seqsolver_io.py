@@ -57,7 +57,7 @@ def main():
             visualize(".")
 
     elif what_to_do == "3":
-        visualdir = input("Please enter the directory of the data ds"
+        visualdir = input("Please enter the directory of the data"
                           "that should be visualized: ")
         visualize(visualdir)
 

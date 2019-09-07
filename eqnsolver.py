@@ -41,7 +41,6 @@ def _discrpot(data, deg=None):
 
     window = np.asarray(data[1].split(" "), dtype=float)
 
-    # Creating empty arrays to fill with data
     xpoint = np.zeros(int(data[4]), dtype=float)
     ypoint = np.zeros(int(data[4]), dtype=float)
     potential = np.zeros(shape=(int(window[2]), 2), dtype=float)
@@ -64,7 +63,6 @@ def _discrpot(data, deg=None):
                 yval[j] += fit[k]*xval[j]**(int(deg)-k)
 
     if data[3] == "cspline":
-        # Interp. data with piecewise cubic poly. with natural boundry cond.
         spline = interpolate.CubicSpline(xpoint, ypoint, bc_type="natural")
         yval = spline.__call__(xval)  # Evaluate spline at x
 

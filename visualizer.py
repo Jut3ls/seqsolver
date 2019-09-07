@@ -23,17 +23,14 @@ def visualize(directory):
     (energies_data, potential_xdata, potential_ydata, wavefuncs_xdata,
      wavefuncs_ydata, expvalues_data) = _importdata(directory)
 
-    # make plot automaticly:
     _auto_make_plot(energies_data, potential_xdata, potential_ydata,
                     wavefuncs_xdata, wavefuncs_ydata, expvalues_data)
 
-    # manually adjust scale:
+    # manually adjust scale or amplitude:
     adjust_limits = input("Manually adjust limits and amplitude? [y/n]")
     if str(adjust_limits) == "y":
         _manual_make_plot(energies_data, potential_xdata, potential_ydata,
                           wavefuncs_xdata, wavefuncs_ydata, expvalues_data)
-    else:
-        print("Plot created!")
 
 
 def _importdata(directory):
@@ -110,9 +107,7 @@ def _auto_make_plot(energies_data, potential_xdata, potential_ydata,
         plt.plot(expvalues_data[o, 0], energies_data[o], 'x', markersize=10,
                  color="purple")
 
-    # format
-    # setting some variables
-    # lim_wave = [x_min, x_max, y_min, y_max]
+    # formatting
     lim_wave = [min(potential_xdata),
                 max(potential_xdata),
                 min(potential_ydata) - abs(min(potential_ydata)-0.5) * 0.1,
@@ -121,13 +116,12 @@ def _auto_make_plot(energies_data, potential_xdata, potential_ydata,
     if abs(lim_wave[3]) <= 0.5:
         lim_wave[3] = lim_wave[3] + 0.25
 
-    # setting format
     plt.xlabel("x [Bohr]", size=16)
     plt.ylabel("Energies [Hartree]", size=16)
     plt.title("Potential, Eigenstates", size=20)
     _format(lim_wave)
 
-    # plot 2: ###################################################
+    # plot 2:
     plt.subplot(1, 2, 2)  # plotting energy levels and exp-values
 
     # energy levels
@@ -137,24 +131,21 @@ def _auto_make_plot(energies_data, potential_xdata, potential_ydata,
         y_energy = [y_energy_data, y_energy_data]
         plt.plot(x_energy, y_energy, linestyle="--", color="grey")
 
-    # exp-values (sigma)
+    # expvalues
     for m in range(0, len(expvalues_data)):
         plt.plot(expvalues_data[m, 1], energies_data[m], 'x', markersize=10,
                  color="purple")
 
-    # format
-    # setting some variables
+    # formatting
     x_max_exp = np.zeros(len(expvalues_data), dtype=float)
     for i in range(len(expvalues_data)):
         x_max_exp[i] = expvalues_data[i, 1]
 
-    # lim_exp = [x_min, x_max, y_min, y_max]
     lim_exp = [0,
                max(x_max_exp) + max(x_max_exp) * 0.1,
                lim_wave[2],
                lim_wave[3]]
 
-    # setting format
     plt.xlabel("[Bohr]", size=16)
     plt.title(r'$\sigma_x$', size=20)
     _format(lim_exp)
@@ -169,7 +160,7 @@ def _manual_make_plot(energies_data, potential_xdata, potential_ydata,
 
     # set manual limits and amplitude factor
 
-    # format (variables)
+    # formatting
     # plot 1:
     lim_wave = [min(potential_xdata),
                 max(potential_xdata),
@@ -198,13 +189,12 @@ def _manual_make_plot(energies_data, potential_xdata, potential_ydata,
         if manual_lim_wave[i].lstrip('-').isdigit():
             lim_wave[i] = int(manual_lim_wave[i])
 
-    # limits of exp plot
+    # limits of expval plot
     lim_exp = [0,
                max(x_max_exp) + max(x_max_exp) * 0.1,
                lim_wave[2],
                lim_wave[3]]
 
-    # make plot:
     plt.figure(figsize=(10, 10), dpi=80)
 
     # plot 1
@@ -232,7 +222,7 @@ def _manual_make_plot(energies_data, potential_xdata, potential_ydata,
     # potential
     plt.plot(potential_xdata, potential_ydata, linestyle="-", color="black")
 
-    # expected values x
+    # expected values
     for o in range(0, len(expvalues_data)):
         plt.plot(expvalues_data[o, 0], energies_data[o], 'x', markersize=10,
                  color="purple")
@@ -245,7 +235,7 @@ def _manual_make_plot(energies_data, potential_xdata, potential_ydata,
     _format(lim_wave)
 
     # plot 2:
-    plt.subplot(1, 2, 2)  # plotting energy levels and exp-values
+    plt.subplot(1, 2, 2)  # plotting energy levels and expvalues
 
     # energy levels
     for y_energy_data in energies_data:
@@ -254,7 +244,7 @@ def _manual_make_plot(energies_data, potential_xdata, potential_ydata,
         y_energy = [y_energy_data, y_energy_data]
         plt.plot(x_energy, y_energy, linestyle="--", color="grey")
 
-    # exp-values (sigma)
+    # expvalues
     for m in range(0, len(expvalues_data)):
         plt.plot(expvalues_data[m, 1], energies_data[m], 'x', markersize=10,
                  color="purple")
