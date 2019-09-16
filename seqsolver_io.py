@@ -3,12 +3,12 @@
 Main user interface for reading and converting input data from schrodinger.inp
 """
 
-import numpy as np
 import os.path
 import argparse
+import numpy as np
 from eqnsolver import solve
 
-_DESCRIPTION = "Explaining command line arguments"
+_DESCRIPTION = "Solve the 1D time independent SEQ for a given input."
 
 
 def main():

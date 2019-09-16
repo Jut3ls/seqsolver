@@ -29,87 +29,90 @@ def solve(inp):
         the position operator in the first, and expected uncertainty
         when measuring the position in the second column.
     """
+    mass, window, eigen, xpoint, ypoint, npoint, inttype = _importdata(inp)
 
-    pot = _discrpot(inp)
-    energies, wavefuncs = _solve_schrodinger(inp, pot)
-    expval = _expected_values(inp, wavefuncs)
+    pot = _discrpot(window, xpoint, ypoint, npoint, inttype)
+
+    energies, wavefuncs = _solve_schrodinger(npoint, eigen, mass, pot)
+
+    expval = _expected_values(eigen, npoint, wavefuncs)
 
     return pot, energies, wavefuncs, expval
 
 
-def _discrpot(data, deg=None):
-
+def _importdata(data):
     window = np.asarray(data[1].split(" "), dtype=float)
-
+    npoint = int(window[2])
     xpoint = np.zeros(int(data[4]), dtype=float)
     ypoint = np.zeros(int(data[4]), dtype=float)
-    potential = np.zeros(shape=(int(window[2]), 2), dtype=float)
-    xval = np.linspace(window[0], window[1], int(window[2]))
+    mass = float(data[0])
+    eigen = np.asarray(data[2].split(" "), dtype=int)
+    inttype = data[3]
 
     for i in range(5, len(data)):  # Seperating x and y values of points
         xpoint[i-5] = np.asarray(data[i].split())[0]
         ypoint[i-5] = np.asarray(data[i].split())[1]
 
-    if data[3] == "linear":
+    return mass, window, eigen, xpoint, ypoint, npoint, inttype
+
+
+def _discrpot(window, xpoint, ypoint, npoint, inttype, deg=None):
+
+    potential = np.zeros(shape=(npoint, 2), dtype=float)
+    xval = np.linspace(window[0], window[1], npoint)
+
+    if inttype == "linear":
         yval = np.interp(xval, xpoint, ypoint)
 
-    if data[3] == "polynomial":
+    if inttype == "polynomial":
         if deg is None:
             deg = input("Please enter the degree of the fitting polynomial: ")
         fit = np.polyfit(xpoint, ypoint, int(deg))
-        yval = np.zeros(shape=int(window[2]), dtype=float)
-        for j in range(int(window[2])):
+        yval = np.zeros(shape=npoint, dtype=float)
+        for j in range(npoint):
             for k in range(int(deg)+1):  # assigning correct xVal to polyfit
                 yval[j] += fit[k]*xval[j]**(int(deg)-k)
 
-    if data[3] == "cspline":
+    if inttype == "cspline":
         spline = interpolate.CubicSpline(xpoint, ypoint, bc_type="natural")
         yval = spline.__call__(xval)  # Evaluate spline at x
 
-    for ii in range(int(window[2])):
-        potential[ii, 0] = xval[ii]
-        potential[ii, 1] = yval[ii]
+    potential[:, 0], potential[:, 1] = xval, yval
+
     return potential
 
 
-def _solve_schrodinger(data, pot):
+def _solve_schrodinger(npoint, eigen, mass, pot):
 
-    window = np.asarray(data[1].split(" "), dtype=float)
-    eigen = np.asarray(data[2].split(" "), dtype=int)
     delta_sq = (abs(pot[1, 0])-abs(pot[0, 0]))**2
-    add = 1/(float(data[0])*delta_sq)
+    add = 1/(mass*delta_sq)
 
     # Filling matrix with data to solve with linalg.eigh_tridiagonal()
-    diag = np.zeros(shape=int(window[2]), dtype=float)
-    off_diag = np.zeros(shape=int(window[2])-1, dtype=float)
-    for jj in range(int(window[2])):
-        diag[jj] = add + pot[jj, 1]
-    for kk in range(int(window[2]-1)):
-        off_diag[kk] = -0.5*add
+    diag = np.zeros(shape=npoint, dtype=float)
+    off_diag = np.zeros(shape=npoint-1, dtype=float)
+
+    diag = add + pot[:, 1]
+    off_diag[:] = -0.5*add
 
     energies, wavefuncs = linalg.eigh_tridiagonal(diag, off_diag, select="i",
                                                   select_range=eigen-1)
 
-    wave_new = np.zeros(shape=(int(window[2]), eigen[1]+1), dtype=float)
-    for ll in range(int(window[2])):
-        wave_new[ll, 0] = pot[ll, 0]
-        for mm in range(eigen[1]):
-            wave_new[ll, mm+1] = wavefuncs[ll, mm]
+    wave_new = np.zeros(shape=(npoint, eigen[1]+1), dtype=float)
+    wave_new[:, 0] = pot[:, 0]
+    for mm in range(eigen[1]):
+        wave_new[:, mm+1] = wavefuncs[:, mm]
 
     return energies, wave_new
 
 
-def _expected_values(data, wfuncs):
+def _expected_values(eigen, npoint, wfuncs):
 
-    window = np.asarray(data[1].split(" "), dtype=float)
-    eigenval = np.asarray(data[2].split(" "), dtype=int)
-
-    x_expected = np.zeros(shape=eigenval[1], dtype=float)
+    x_expected = np.zeros(shape=eigen[1], dtype=float)
     x_squared, x_uncertainty = np.array(x_expected), np.array(x_expected)
-    expvalues = np.zeros(shape=(eigenval[1], 2), dtype=float)
+    expvalues = np.zeros(shape=(eigen[1], 2), dtype=float)
 
-    for nn in range(eigenval[1]):
-        for i in range(int(window[2])):
+    for nn in range(eigen[1]):
+        for i in range(npoint):
             x_expected[nn] += wfuncs[i, nn+1]*wfuncs[i, 0]*wfuncs[i, nn+1]
             x_squared[nn] += wfuncs[i, nn+1]*wfuncs[i, 0]**2*wfuncs[i, nn+1]
         x_uncertainty[nn] = (x_squared[nn] - x_expected[nn]**2)**0.5
