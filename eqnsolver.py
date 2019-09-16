@@ -7,7 +7,7 @@ import numpy as np
 from scipy import interpolate, linalg
 
 
-def solve(inp):
+def solve(inp, deg=None):
     """Creates discrete potentials from data provided by input file, then
     solves the discretized 1D SEQ and calculates derived units from discrete
     eigenfunctions.
@@ -17,6 +17,10 @@ def solve(inp):
     seqsolver_io.main() that specifies the potential, sets interpolation\
     points and declares the interpolation type.
 
+    :param deg: Only for polynomial fit. If omitted, the program will ask for\
+    an input later, if the 'polynomial' option was selected in the input file.\
+    Mainly used by the test_eqnsolver module because the degree of the\
+    polynomial used in reference data does not change.
 
     :return: **pot:** Array containing the discrete potential.
 
@@ -31,7 +35,7 @@ def solve(inp):
     """
     mass, window, eigen, xpoint, ypoint, npoint, inttype = _importdata(inp)
 
-    pot = _discrpot(window, xpoint, ypoint, npoint, inttype)
+    pot = _discrpot(window, xpoint, ypoint, npoint, inttype, deg)
 
     energies, wavefuncs = _solve_schrodinger(npoint, eigen, mass, pot)
 

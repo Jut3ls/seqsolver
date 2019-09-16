@@ -16,7 +16,7 @@ def main():
     Solves the 1D SEQ by converting schrodinger.inp input data to a list
     and calls eqnsolver.solve() with that list as an argument, then saves the
     returned values as .dat output files. The input data directory can be
-    passed with the optional argument -d or --directory.
+    passed with the optional argument -d or --directory in the command line.
     """
 
     parser = argparse.ArgumentParser(description=_DESCRIPTION)

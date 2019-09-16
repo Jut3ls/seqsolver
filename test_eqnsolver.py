@@ -5,7 +5,7 @@ Contains routines to test the eqnsolver module.
 
 import numpy as np
 import pytest
-import eqnsolver
+from eqnsolver import solve
 
 _TOL = 1e-10
 _DIR = ["inf", "as", "harmonic", "fin", "dl", "cdl"]
@@ -35,10 +35,7 @@ def test_parametrized(dir1):
     newdata = [entry.strip().split("\n")[0] for entry in data]
     fp.close()
 
-    mass, window, eigen, xp, yp, npoint, itype = eqnsolver._importdata(newdata)
-
-    recpot = eqnsolver._discrpot(window, xp, yp, npoint, itype, 2)
-    receig = eqnsolver._solve_schrodinger(npoint, eigen, mass, recpot)[0]
+    recpot, receig, _, _ = solve(newdata, 2)
 
     assert np.all(np.abs(recpot - exppot) < _TOL)
     assert np.all(np.abs(receig - expeig) < _TOL)
