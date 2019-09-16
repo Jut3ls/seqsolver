@@ -94,7 +94,6 @@ def _auto_make_plot(energies_data, potential_xdata, potential_ydata,
     y_wave = np.zeros(len(wavefuncs_xdata), dtype=float)
 
     for j in range(0, len(energies_data)):
-        print(j)
         for k in range(0, len(wavefuncs_xdata)):
             y_wave[k] = wavefuncs_ydata[k, j] + energies_data[j]
         if j % 2 == 0:
