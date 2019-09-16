@@ -4,65 +4,43 @@ Main user interface for reading and converting input data from schrodinger.inp
 """
 
 import numpy as np
+import os.path
+import argparse
 from eqnsolver import solve
-from visualizer import visualize
+
+_DESCRIPTION = "Explaining command line arguments"
 
 
 def main():
-    """Calls eqnsolver.solve() and visualizer.visualize() in a different manner
-    depending on user input. User can choose between one of these tree
-    options:
-
-    *1: Solve the 1D SEQ*:
-        Converts schrodinger.inp input data to a list and calls
-        eqnsolver.solve() with that list as an argument, then saves the
-        returned values as .dat output files.
-    *2: Solve the 1D SEQ and visualize the created data*:
-        Runs the same routines as option 1, but also calls
-        visualizer.visualize() to visualize the data obtained by
-        eqnsolver.solve().
-    *3: Visualize your own data*:
-        Only calls visualizer.visualize to plot existing data from a given
-        directory if .dat files follow the 'potential', 'wavefuncs', 'eigenval'
-        and 'expval' naming convention.
-
+    """
+    Solves the 1D SEQ by converting schrodinger.inp input data to a list
+    and calls eqnsolver.solve() with that list as an argument, then saves the
+    returned values as .dat output files. The input data directory can be
+    passed with the optional argument -d or --directory.
     """
 
-    print("What do you want to do?\n")
-    print("1: Solve the 1D SEQ")
-    print("2: Solve the 1D SEQ and visualize the created data")
-    print("3: Visualize your own data")
+    parser = argparse.ArgumentParser(description=_DESCRIPTION)
+    msg = "Directory  (default: .)"
+    parser.add_argument("-d", "--directory", default=".", help=msg)
+    args = parser.parse_args()
 
-    what_to_do = input("Please select one of the options above: ")
+    path = os.path.join(args.directory, "schrodinger.inp")
+    fp = open(path, "r")
+    lines = fp.readlines()
+    data = []
 
-    if what_to_do == "1" or what_to_do == "2":
-        directory = input("Please enter the directory of your input file: ")
-        fp = open(directory + r"\schrodinger.inp", "r")
-        lines = fp.readlines()
-        data = []
-        for i in range(len(lines)):
-            data.append(lines[i].split("#")[0])
-            data[i] = data[i].split("\t")[0]
-            data[i] = data[i].split("\n")[0]
-        fp.close()
+    for line in lines:
+        data.append(line.split("#")[0])
+    # removing whitespaces and newlines from list
+    newdata = [entry.strip().split("\n")[0] for entry in data]
+    fp.close()
 
-        discrpot, eigenval, wfuncs, expval = solve(data)
+    discrpot, eigenval, wfuncs, expval = solve(newdata)
 
-        np.savetxt("potential.dat", discrpot)
-        np.savetxt("energies.dat", eigenval)
-        np.savetxt("wavefuncs.dat", wfuncs)
-        np.savetxt("expvalues.dat", expval)
-
-        if what_to_do == "2":
-            visualize(".")
-
-    elif what_to_do == "3":
-        visualdir = input("Please enter the directory of the data"
-                          "that should be visualized: ")
-        visualize(visualdir)
-
-    else:
-        print("Could not understand input. Exiting...")
+    np.savetxt("potential.dat", discrpot)
+    np.savetxt("energies.dat", eigenval)
+    np.savetxt("wavefuncs.dat", wfuncs)
+    np.savetxt("expvalues.dat", expval)
 
 
 if __name__ == '__main__':

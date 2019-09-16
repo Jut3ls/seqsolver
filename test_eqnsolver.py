@@ -22,21 +22,21 @@ def test_parametrized(dir1):
 
     """
 
+    exppot = np.loadtxt("tests/ref_{arg}/potential_{arg}.dat".format(arg=dir1))
+    expeig = np.loadtxt("tests/ref_{arg}/energies_{arg}.dat".format(arg=dir1))
+
     fp = open(r"tests/ref_{arg}/{arg}.inp".format(arg=dir1))
     lines = fp.readlines()
     data = []
 
-    exppot = np.loadtxt("tests/ref_{arg}/potential_{arg}.dat".format(arg=dir1))
-    expeig = np.loadtxt("tests/ref_{arg}/energies_{arg}.dat".format(arg=dir1))
-
-    for ii in range(len(lines)):
-        data.append(lines[ii].split("#")[0])
-        data[ii] = data[ii].split("\t")[0]
-        data[ii] = data[ii].split("\n")[0]
+    for line in lines:
+        data.append(line.split("#")[0])
+    # removing whitespaces and newlines from list
+    newdata = [entry.strip().split("\n")[0] for entry in data]
     fp.close()
 
-    recpot = eqnsolver._discrpot(data, 2)
-    receig = eqnsolver._solve_schrodinger(data, recpot)[0]
+    recpot = eqnsolver._discrpot(newdata, 2)
+    receig = eqnsolver._solve_schrodinger(newdata, recpot)[0]
 
     assert np.all(np.abs(recpot - exppot) < _TOL)
     assert np.all(np.abs(receig - expeig) < _TOL)
