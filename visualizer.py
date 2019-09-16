@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 """
 Main routines for creating plots from output-files.
 """
@@ -8,7 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def visualize():
+def main():
     '''
     Creates plot from given directory as .pdf file with optional scaling
     adjustments for xy-boundries and amplitudes. Plot contains wavefunctions,
@@ -148,7 +148,7 @@ def _auto_make_plot(energies_data, potential_xdata, potential_ydata,
                lim_wave[2],
                lim_wave[3]]
 
-    plt.xlabel("[Bohr]", size=16)
+    plt.xlabel("x [Bohr]", size=16)
     plt.title(r'$\sigma_x$', size=20)
     _format(lim_exp)
 
@@ -250,7 +250,7 @@ def _manual_make_plot(energies_data, potential_xdata, potential_ydata,
                  color="purple")
 
     # setting format
-    plt.xlabel("[Bohr]", size=16)
+    plt.xlabel("x [Bohr]", size=16)
     plt.title(r'$\sigma_x$', size=20)
     _format(lim_exp)
 
@@ -276,4 +276,5 @@ def _check_directory():
     return str(r".")
 
 
-visualize()
+if __name__ == "__main__":
+    main()

@@ -35,8 +35,10 @@ def test_parametrized(dir1):
     newdata = [entry.strip().split("\n")[0] for entry in data]
     fp.close()
 
-    recpot = eqnsolver._discrpot(newdata, 2)
-    receig = eqnsolver._solve_schrodinger(newdata, recpot)[0]
+    mass, window, eigen, xp, yp, npoint, itype = eqnsolver._importdata(newdata)
+
+    recpot = eqnsolver._discrpot(window, xp, yp, npoint, itype, 2)
+    receig = eqnsolver._solve_schrodinger(npoint, eigen, mass, recpot)[0]
 
     assert np.all(np.abs(recpot - exppot) < _TOL)
     assert np.all(np.abs(receig - expeig) < _TOL)

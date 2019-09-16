@@ -23,19 +23,23 @@ Requirements:
 
 Usage:
 
-1) Launch seqsolver_io.py
+Schrodinger-equation solver:
+1) Launch seqsolver_io.py from command line.
+   Default directory of the schrodinger.inp input file is the home directory,
+   changeable by optional command line argument -d or --directory. Type python seqsolver_io.py -h for help. 
 
-2) Select options (input file has to be named "schrodinger.inp")
-	2.1) Generates data from given input, files saved in home directory.
-	2.2) Generates data, files saved in home directory. Creates plot from generated data.
-	2.3) Creates plot from data in given directory (see additional information for data format).
-
-3) (Optional) Generates a plot from created or given data. Program sets limits itself. In addition you are able to manually set the limits and modify the amplitude.
-	3.1) No manual limits set. Plot saved as plots.pdf in home directory.
-	3.2) Manual limits and amplitude modifyer set: 
+Visualizer:
+1) Launch visualizer.py from command line for visualization of your data.
+   Visualizer checks if data files are in home directory. If not you will be asked to specify the directory yourself.
+   Generates a plot from created or given data. Program sets limits itself. In addition you are able to manually set the limits and modify the amplitude.
+	2.1) No manual limits set. Plot saved as plots.pdf in home directory.
+	2.2) Manual limits and amplitude modifyer set: 
 		 Set amplitude modyfier.
 		 Set manual limits. Format: x-min, x-max, y-min, y-max;  default = d 
 	Automatic and manually created plots are saved as plots.pdf and manual_plots.pdf respectively.
+	
+Unit-tests:
+1) To start unit tests for six different reference potentials, launch python -m pytest in home directory.
 
 
 
@@ -43,12 +47,14 @@ Format of input file (schrodinger.inp):
 
 e.g:
 2.0 			# mass
--2.0 2.0 1999 	# xMin xMax nPoint
+-2.0 2.0 1999 	# xMin xMax nPoint 
 1 5 			# first and last eigenvalue to print
 linear 			# interpolation type (linear, polynomial, cspline)
 2 				# nr. of interpolation points and xy declarations
 -2.0 0.0
  2.0 0.0
+
+Units follow the atomic units system where distance is measured in Bohr and mass is described in multiples of electron mass. Unit of energy is Hartree.
 
 
 Format of data files:
